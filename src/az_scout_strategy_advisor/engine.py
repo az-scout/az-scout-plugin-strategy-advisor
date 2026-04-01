@@ -23,7 +23,7 @@ from az_scout.services._evaluation_helpers import (
 )
 from az_scout.services.region_latency import get_rtt_ms
 
-from az_scout_strategy.models import (
+from az_scout_strategy_advisor.models import (
     BusinessView,
     CapacityStrategyResponse,
     RegionAllocation,

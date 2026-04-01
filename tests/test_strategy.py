@@ -6,14 +6,15 @@ Covers:
 - POST /plugins/strategy/capacity-strategy endpoint (integration tests)
 """
 
+from typing import Any
 from unittest.mock import patch
 
-from az_scout_strategy.engine import (
+from az_scout_strategy_advisor.engine import (
     _RegionEval,
     _select_strategy,
     recommend_capacity_strategy,
 )
-from az_scout_strategy.models import WorkloadProfileRequest
+from az_scout_strategy_advisor.models import WorkloadProfileRequest
 
 # ---------------------------------------------------------------------------
 # Fixtures — SKU dicts matching azure_api.get_skus output
@@ -27,7 +28,7 @@ def _make_sku(
     restrictions: list[str] | None = None,
     vcpus: str = "2",
     memory_gb: str = "8",
-) -> dict:
+) -> dict[str, Any]:
     return {
         "name": name,
         "family": family,
@@ -37,25 +38,25 @@ def _make_sku(
     }
 
 
-def _enrich_quotas(skus: list[dict], *_args, **_kwargs) -> list[dict]:
+def _enrich_quotas(skus: list[dict[str, Any]], *_args, **_kwargs) -> list[dict[str, Any]]:
     for sku in skus:
         sku["quota"] = {"limit": 100, "used": 10, "remaining": 90}
     return skus
 
 
-def _enrich_quotas_blocking(skus: list[dict], *_args, **_kwargs) -> list[dict]:
+def _enrich_quotas_blocking(skus: list[dict[str, Any]], *_args, **_kwargs) -> list[dict[str, Any]]:
     for sku in skus:
         sku["quota"] = {"limit": 100, "used": 100, "remaining": 0}
     return skus
 
 
-def _enrich_prices(skus: list[dict], *_args, **_kwargs) -> list[dict]:
+def _enrich_prices(skus: list[dict[str, Any]], *_args, **_kwargs) -> list[dict[str, Any]]:
     for sku in skus:
         sku["pricing"] = {"paygo": 0.10, "spot": 0.03}
     return skus
 
 
-SAMPLE_SPOT_SCORES: dict = {
+SAMPLE_SPOT_SCORES: dict[str, Any] = {
     "scores": {
         "Standard_D2s_v3": {"1": "High", "2": "High", "3": "Medium"},
     },
@@ -173,7 +174,7 @@ class TestSelectStrategy:
 
 
 class TestRecommendCapacityStrategy:
-    @patch("az_scout_strategy.engine.azure_api")
+    @patch("az_scout_strategy_advisor.engine.azure_api")
     def test_nominal(self, mock_api) -> None:
         mock_api.get_skus.return_value = [_make_sku()]
         mock_api.enrich_skus_with_quotas.side_effect = _enrich_quotas
@@ -190,7 +191,7 @@ class TestRecommendCapacityStrategy:
         assert len(result.technicalView.allocations) >= 1
         assert result.disclaimer  # Always present
 
-    @patch("az_scout_strategy.engine.azure_api")
+    @patch("az_scout_strategy_advisor.engine.azure_api")
     def test_quota_blocking_shards(self, mock_api) -> None:
         mock_api.get_skus.return_value = [_make_sku()]
         mock_api.enrich_skus_with_quotas.side_effect = _enrich_quotas_blocking
@@ -205,7 +206,7 @@ class TestRecommendCapacityStrategy:
 
         assert result.summary.workloadName == "test-workload"
 
-    @patch("az_scout_strategy.engine.azure_api")
+    @patch("az_scout_strategy_advisor.engine.azure_api")
     def test_no_candidate_regions(self, mock_api) -> None:
         profile = _make_profile(
             constraints={
@@ -218,7 +219,7 @@ class TestRecommendCapacityStrategy:
         assert result.summary.regionCount == 0
         assert any("No candidate regions" in e for e in result.errors)
 
-    @patch("az_scout_strategy.engine.azure_api")
+    @patch("az_scout_strategy_advisor.engine.azure_api")
     def test_unknown_latency_adds_warning(self, mock_api) -> None:
         mock_api.get_skus.return_value = [_make_sku()]
         mock_api.enrich_skus_with_quotas.side_effect = _enrich_quotas

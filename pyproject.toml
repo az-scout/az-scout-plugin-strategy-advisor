@@ -28,10 +28,10 @@ dev = [
 ]
 
 [project.entry-points."az_scout.plugins"]
-strategy = "az_scout_strategy:plugin"
+strategy_advisor = "az_scout_strategy_advisor:plugin"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/az_scout_strategy"]
+packages = ["src/az_scout_strategy_advisor"]
 
 [tool.hatch.version]
 source = "vcs"
@@ -40,12 +40,12 @@ raw-options.version_scheme = "calver-by-date"
 raw-options.local_scheme = "no-local-version"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "src/az_scout_strategy/_version.py"
+version-file = "src/az_scout_strategy_advisor/_version.py"
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-exclude = ["src/az_scout_strategy/_version.py"]
+exclude = ["src/az_scout_strategy_advisor/_version.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "UP", "B", "SIM"]

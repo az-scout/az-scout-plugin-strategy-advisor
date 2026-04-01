@@ -5,8 +5,8 @@ import logging
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
-from az_scout_strategy.engine import recommend_capacity_strategy
-from az_scout_strategy.models import WorkloadProfileRequest
+from az_scout_strategy_advisor.engine import recommend_capacity_strategy
+from az_scout_strategy_advisor.models import WorkloadProfileRequest
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +31,6 @@ async def capacity_strategy(body: WorkloadProfileRequest) -> JSONResponse:
     try:
         result = recommend_capacity_strategy(body)
         return JSONResponse(result.model_dump())
-    except Exception as exc:
+    except Exception:
         logger.exception("Failed to compute capacity strategy")
-        return JSONResponse({"error": str(exc)}, status_code=500)
+        return JSONResponse({"error": "Internal server error"}, status_code=500)

@@ -8,9 +8,9 @@
 //   - escapeHtml(str)  – HTML-escape utility
 //   - showError(id, msg) / hideError(id)
 //   - formatNum(n, decimals)
-// Static assets are served at /plugins/strategy/static/
+// Static assets are served at /plugins/strategy-advisor/static/
 (function () {
-    const PLUGIN_NAME = "strategy";
+    const PLUGIN_NAME = "strategy-advisor";
     const API_BASE = "/plugins/" + PLUGIN_NAME;
     const container = document.getElementById("plugin-tab-" + PLUGIN_NAME);
     if (!container) return;
@@ -35,6 +35,10 @@
     // -----------------------------------------------------------------------
     function initStrategyPlugin() {
         initStratSubCombobox();
+        const form = document.getElementById("strategy-form");
+        if (form) {
+            form.addEventListener("submit", submitStrategy);
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -87,15 +91,12 @@
         });
 
         // Re-render when subscriptions change (tenant switch)
-        const tenantEl = document.getElementById("tenant-select");
-        if (tenantEl) {
-            tenantEl.addEventListener("change", () => {
-                _stratSubscriptionId = null;
-                const si = document.getElementById("strat-sub-search");
-                if (si) { si.value = ""; }
-                document.getElementById("strat-sub-select").value = "";
-            });
-        }
+        document.addEventListener("azscout:tenant-changed", () => {
+            _stratSubscriptionId = null;
+            const si = document.getElementById("strat-sub-search");
+            if (si) { si.value = ""; }
+            document.getElementById("strat-sub-select").value = "";
+        });
     }
 
     function renderStratSubDropdown(filter) {
@@ -130,8 +131,7 @@
     // -----------------------------------------------------------------------
     // Form submission
     // -----------------------------------------------------------------------
-    // Expose submitStrategy globally so the form onsubmit can call it
-    window.submitStrategy = async function (e) {
+    async function submitStrategy(e) {
         e.preventDefault();
 
         const subId = _stratSubscriptionId;
@@ -181,7 +181,7 @@
             document.getElementById("strategy-loading").classList.add("d-none");
             document.getElementById("strat-submit-btn").disabled = false;
         }
-    };
+    }
 
     // -----------------------------------------------------------------------
     // Results rendering

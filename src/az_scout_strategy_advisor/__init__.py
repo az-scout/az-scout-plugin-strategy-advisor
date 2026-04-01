@@ -6,14 +6,17 @@ pricing, confidence, and inter-region latency to recommend a multi-region
 deployment strategy.
 """
 
+from __future__ import annotations
+
 from collections.abc import Callable
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from az_scout.plugin_api import ChatMode, TabDefinition
-from fastapi import APIRouter
+if TYPE_CHECKING:
+    from az_scout.plugin_api import ChatMode, TabDefinition
+    from fastapi import APIRouter
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
@@ -26,18 +29,18 @@ except PackageNotFoundError:
 class StrategyAdvisorPlugin:
     """Strategy Advisor plugin for az-scout."""
 
-    name = "strategy"
+    name = "strategy-advisor"
     version = __version__
 
     def get_router(self) -> APIRouter | None:
-        """Return API routes mounted at /plugins/strategy/."""
-        from az_scout_strategy.routes import router
+        """Return API routes mounted at /plugins/strategy-advisor/."""
+        from az_scout_strategy_advisor.routes import router
 
         return router
 
     def get_mcp_tools(self) -> list[Callable[..., Any]] | None:
         """Return MCP tool functions."""
-        from az_scout_strategy.tools import capacity_strategy
+        from az_scout_strategy_advisor.tools import capacity_strategy
 
         return [capacity_strategy]
 
@@ -47,9 +50,11 @@ class StrategyAdvisorPlugin:
 
     def get_tabs(self) -> list[TabDefinition] | None:
         """Return UI tab definitions."""
+        from az_scout.plugin_api import TabDefinition
+
         return [
             TabDefinition(
-                id="strategy",
+                id="strategy-advisor",
                 label="Strategy Advisor",
                 icon="bi bi-compass",
                 js_entry="js/strategy-tab.js",

@@ -5,8 +5,8 @@ from typing import Annotated
 
 from pydantic import Field
 
-from az_scout_strategy.engine import recommend_capacity_strategy
-from az_scout_strategy.models import (
+from az_scout_strategy_advisor.engine import recommend_capacity_strategy
+from az_scout_strategy_advisor.models import (
     DataProfile,
     PricingSpec,
     ScaleSpec,
